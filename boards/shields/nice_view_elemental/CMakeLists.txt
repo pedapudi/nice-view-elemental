@@ -27,7 +27,8 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
   else()
     zephyr_library_sources(
       ./src/peripheral/initialize_listeners.c
-      ./src/images/noise.c
+      ./src/images/noise_0.c
+      ./src/images/noise_1.c
       ./src/peripheral/render.c
     )
   endif()
