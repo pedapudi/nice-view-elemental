@@ -83,7 +83,7 @@ const lv_img_dsc_t* images[] = {
 };
 
 // 2. Update the number of frames in the animation to match the number of images.
-static const unsigned int frame_count = 1;
+static const unsigned int frame_count = 2;
 
 void initialize_animation() {
     lv_animimg_set_src(image_canvas, (const void**)images, frame_count);
