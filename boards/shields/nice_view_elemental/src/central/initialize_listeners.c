@@ -160,7 +160,6 @@ ZMK_SUBSCRIPTION(
     zmk_layer_state_changed
 );
 
-
 static void modifiers_state_update_callback(struct modifiers_state state) {
     states.modifiers = state;
 

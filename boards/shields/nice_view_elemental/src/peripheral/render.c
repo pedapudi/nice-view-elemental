@@ -15,28 +15,31 @@
 #include "../../include/images/noise_1.h"
 
 void rotate_battery_canvas() {
-    static lv_color_t tmp_buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(BATTERY_CANVAS_WIDTH, BATTERY_CANVAS_HEIGHT)];
+    static lv_color_t tmp_buffer[
+        LV_CANVAS_BUF_SIZE(
+            BATTERY_CANVAS_WIDTH,
+            BATTERY_CANVAS_HEIGHT,
+            LV_COLOR_FORMAT_GET_BPP(COLOR_FORMAT),
+            LV_DRAW_BUF_STRIDE_ALIGN
+        )
+    ];
     memcpy(tmp_buffer, battery_canvas_buffer, sizeof(tmp_buffer));
 
-    lv_img_dsc_t tmp_canvas;
-    tmp_canvas.data = (void*)tmp_buffer;
-    tmp_canvas.header.cf = LV_IMG_CF_TRUE_COLOR;
-    tmp_canvas.header.w = BATTERY_CANVAS_WIDTH;
-    tmp_canvas.header.h = BATTERY_CANVAS_HEIGHT;
-
-    lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
-    lv_canvas_transform(
-        battery_canvas,
-        &tmp_canvas,
-        1800, LV_IMG_ZOOM_NONE,
-        -1, 0,
-        BATTERY_CANVAS_WIDTH / 2, BATTERY_CANVAS_HEIGHT / 2,
-        false
+    const uint32_t stride = lv_draw_buf_width_to_stride(BATTERY_CANVAS_WIDTH, COLOR_FORMAT);
+    lv_draw_sw_rotate(
+        tmp_buffer,
+        battery_canvas_buffer,
+        BATTERY_CANVAS_WIDTH,
+        BATTERY_CANVAS_HEIGHT,
+        stride,
+        stride,
+        LV_DISPLAY_ROTATION_180,
+        COLOR_FORMAT
     );
 }
 
 void render_battery() {
-    lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
+    lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_100);
 
     draw_battery(battery_canvas, 0, 0, states.battery);
 
@@ -44,28 +47,31 @@ void render_battery() {
 }
 
 void rotate_connectivity_canvas() {
-    static lv_color_t tmp_buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(CONNECTIVITY_CANVAS_WIDTH, CONNECTIVITY_CANVAS_HEIGHT)];
+    static lv_color_t tmp_buffer[
+        LV_CANVAS_BUF_SIZE(
+            CONNECTIVITY_CANVAS_WIDTH,
+            CONNECTIVITY_CANVAS_HEIGHT,
+            LV_COLOR_FORMAT_GET_BPP(COLOR_FORMAT),
+            LV_DRAW_BUF_STRIDE_ALIGN
+        )
+    ];
     memcpy(tmp_buffer, connectivity_canvas_buffer, sizeof(tmp_buffer));
 
-    lv_img_dsc_t tmp_canvas;
-    tmp_canvas.data = (void*)tmp_buffer;
-    tmp_canvas.header.cf = LV_IMG_CF_TRUE_COLOR;
-    tmp_canvas.header.w = CONNECTIVITY_CANVAS_WIDTH;
-    tmp_canvas.header.h = CONNECTIVITY_CANVAS_HEIGHT;
-
-    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
-    lv_canvas_transform(
-        connectivity_canvas,
-        &tmp_canvas,
-        1800, LV_IMG_ZOOM_NONE,
-        -1, 0,
-        CONNECTIVITY_CANVAS_WIDTH / 2, CONNECTIVITY_CANVAS_HEIGHT / 2,
-        false
+    const uint32_t stride = lv_draw_buf_width_to_stride(CONNECTIVITY_CANVAS_WIDTH, COLOR_FORMAT);
+    lv_draw_sw_rotate(
+        tmp_buffer,
+        connectivity_canvas_buffer,
+        CONNECTIVITY_CANVAS_WIDTH,
+        CONNECTIVITY_CANVAS_HEIGHT,
+        stride,
+        stride,
+        LV_DISPLAY_ROTATION_180,
+        COLOR_FORMAT
     );
 }
 
 void render_connectivity() {
-    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
+    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_100);
 
     if (states.connectivity.connected) {
         draw_bluetooth_logo(connectivity_canvas, 16, 0);
@@ -77,7 +83,7 @@ void render_connectivity() {
 }
 
 // 1. Insert images here.
-const lv_img_dsc_t* images[] = {
+const lv_image_dsc_t* images[] = {
     &noise_0,
     &noise_1
 };
@@ -88,7 +94,7 @@ static const unsigned int frame_count = 2;
 void initialize_animation() {
     lv_animimg_set_src(image_canvas, (const void**)images, frame_count);
     // 3. Set the time for the whole animation.
-    lv_animimg_set_duration(image_canvas, 100);
+    lv_animimg_set_duration(image_canvas, 250);
 }
 
 void start_animation() {

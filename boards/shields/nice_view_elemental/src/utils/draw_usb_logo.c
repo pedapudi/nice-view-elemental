@@ -4,8 +4,21 @@
 #include "../../include/images/usb_logo.h"
 
 void draw_usb_logo(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y) {
-    lv_draw_img_dsc_t img_dsc;
-    lv_draw_img_dsc_init(&img_dsc);
+    lv_draw_image_dsc_t img_dsc;
+    lv_draw_image_dsc_init(&img_dsc);
+    img_dsc.src = &usb_logo;
 
-    lv_canvas_draw_img(canvas, x, y, &usb_logo, &img_dsc);
+    lv_layer_t layer;
+    lv_canvas_init_layer(canvas, &layer);
+
+    lv_area_t coords = { 
+        x,
+        y,
+        x + usb_logo.header.w - 1,
+        y + usb_logo.header.h - 1
+    };
+
+    lv_draw_image(&layer, &img_dsc, &coords);
+
+    lv_canvas_finish_layer(canvas, &layer);
 }

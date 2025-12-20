@@ -19,7 +19,7 @@
 #include "../../include/utils/draw_usb_logo.h"
 
 void render_battery() {
-    lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
+    lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_100);
 
     draw_battery(battery_canvas, 0, 0, states.battery);
 }
@@ -42,11 +42,11 @@ static void render_bluetooth_profile_index() {
     label_dsc.color = FOREGROUND_COLOR;
     label_dsc.font = &press_start_2p_16;
     label_dsc.align = LV_TEXT_ALIGN_RIGHT;
-
+    
     // Magic number
     static const unsigned padding_x_offset = 2;
     static const unsigned padding_x = padding_x_offset;
-
+    
     // Magic number
     static const unsigned padding_y_offset = 1;
     // `ceil` is used to tend towards the bottom of the screen.
@@ -54,8 +54,21 @@ static void render_bluetooth_profile_index() {
     static const unsigned width = CONNECTIVITY_CANVAS_WIDTH - 12 - 2;
     static const char bluetooth_profile_label[5][2] = {"1", "2", "3", "4", "5"};
     const char* label = bluetooth_profile_label[states.connectivity.active_profile_index];
+    label_dsc.text = label;
+
+    lv_layer_t layer;
+    lv_canvas_init_layer(connectivity_canvas, &layer);
+
+    lv_area_t coords_rect = { 
+        padding_x,
+        padding_y,
+        padding_x + width - 1,
+        padding_y + press_start_2p_16.line_height - 1
+    };
    
-    lv_canvas_draw_text(connectivity_canvas, padding_x, padding_y, width, &label_dsc, label);
+    lv_draw_label(&layer, &label_dsc, &coords_rect);
+
+    lv_canvas_finish_layer(connectivity_canvas, &layer);
 }
 
 static void render_bluetooth_connectivity() {
@@ -68,7 +81,7 @@ static void render_usb_connectivity() {
 }
 
 void render_connectivity() {
-    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_COVER);
+    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_100);
 
     switch (states.connectivity.selected_endpoint.transport) {
         case ZMK_TRANSPORT_BLE: {
@@ -83,18 +96,21 @@ void render_connectivity() {
 }
 
 void render_main() {
+    lv_layer_t layer;
+    lv_canvas_init_layer(layer_canvas, &layer);
+
     lv_draw_rect_dsc_t background_dsc;
     lv_draw_rect_dsc_init(&background_dsc);
     background_dsc.bg_color = BACKGROUND_COLOR;
-    
-    lv_canvas_draw_rect(
-        layer_canvas,
+
+    lv_area_t coords_rect = { 
         0,
         0,
-        LAYER_CANVAS_WIDTH,
-        LAYER_CANVAS_HEIGHT,
-        &background_dsc
-    );
+        0 + LAYER_CANVAS_WIDTH - 1,
+        0 + LAYER_CANVAS_HEIGHT - 1
+    };
+
+    lv_draw_rect(&layer, &background_dsc, &coords_rect);
 
     // Capitalize the layer name if given or use the layer number otherwise.
     char* text = NULL;
@@ -119,15 +135,22 @@ void render_main() {
     layer_name_dsc.color = FOREGROUND_COLOR;
     layer_name_dsc.font = &press_start_2p_24;
     layer_name_dsc.align = LV_TEXT_ALIGN_CENTER;
+    layer_name_dsc.text = text;
 
-    lv_canvas_draw_text(
-        layer_canvas,
+    lv_area_t layer_name_coords_rect = {
         0,
         0,
-        LAYER_CANVAS_WIDTH,
+        LAYER_CANVAS_WIDTH - 1,
+        LAYER_CANVAS_HEIGHT - 1
+    };
+    
+    lv_draw_label(
+        &layer,
         &layer_name_dsc,
-        text
+        &layer_name_coords_rect
     );
+
+    lv_canvas_finish_layer(layer_canvas, &layer);
 
     free(text);
     text = NULL;
@@ -137,14 +160,21 @@ void render_modifiers() {
     lv_draw_rect_dsc_t background_dsc;
     lv_draw_rect_dsc_init(&background_dsc);
     background_dsc.bg_color = BACKGROUND_COLOR;
+
+    lv_area_t background_coords_rect = { 
+        0,
+        0,
+        0 + MODIFIERS_CANVAS_WIDTH - 1,
+        0 + MODIFIERS_CANVAS_HEIGHT - 1
+    };
+
+    lv_layer_t layer;
+    lv_canvas_init_layer(modifiers_canvas, &layer);
     
-    lv_canvas_draw_rect(
-        modifiers_canvas,
-        0,
-        0,
-        MODIFIERS_CANVAS_WIDTH,
-        MODIFIERS_CANVAS_HEIGHT,
-        &background_dsc
+    lv_draw_rect(
+        &layer,
+        &background_dsc,
+        &background_coords_rect
     );
 
     lv_draw_rect_dsc_t active_modifier_background_dsc;
@@ -156,91 +186,129 @@ void render_modifiers() {
     active_modifier_text_dsc.color = BACKGROUND_COLOR;
     active_modifier_text_dsc.font = &press_start_2p_8;
     active_modifier_text_dsc.align = LV_TEXT_ALIGN_LEFT;
-
+    
     lv_draw_label_dsc_t inactive_modifier_text_dsc;
     lv_draw_label_dsc_init(&inactive_modifier_text_dsc);
     inactive_modifier_text_dsc.color = FOREGROUND_COLOR;
     inactive_modifier_text_dsc.font = &press_start_2p_8;
     inactive_modifier_text_dsc.align = LV_TEXT_ALIGN_LEFT;
-
+    
     if (states.modifiers.is_gui_active) {
-        lv_canvas_draw_rect(
-            modifiers_canvas,
-            // 0 * (MODIFIER_WIDTH + MODIFIER_PADDING_X),
+        lv_area_t active_modifier_coords_rect = {
+            0, // 0 * (MODIFIER_WIDTH + MODIFIER_PADDING_X),
             0,
-            0,
-            MODIFIER_WIDTH,
-            MODIFIERS_CANVAS_HEIGHT,
-            &active_modifier_background_dsc
+            0 + MODIFIER_WIDTH - 1,
+            0 + MODIFIERS_CANVAS_HEIGHT - 1
+        };
+        
+        lv_draw_rect(
+            &layer,
+            &active_modifier_background_dsc,
+            &active_modifier_coords_rect
         );
     }
-
-    lv_canvas_draw_text(
-        modifiers_canvas,
+    
+    lv_area_t win_modifier_coords_rect = {
         MODIFIER_PADDING_X,
         MODIFIER_PADDING_Y,
-        MODIFIER_WIDTH,
+        MODIFIER_PADDING_X + MODIFIER_WIDTH - 1,
+        MODIFIER_PADDING_Y + press_start_2p_8.line_height - 1
+    };
+    
+    active_modifier_text_dsc.text = "W";
+    inactive_modifier_text_dsc.text = "W";
+    lv_draw_label(
+        &layer,
         states.modifiers.is_gui_active ? &active_modifier_text_dsc : &inactive_modifier_text_dsc,
-        "W"
+        &win_modifier_coords_rect
     );
 
     if (states.modifiers.is_alt_active) {
-        lv_canvas_draw_rect(
-            modifiers_canvas,
+        lv_area_t active_modifier_coords_rect = {
             1 * (MODIFIER_WIDTH + MODIFIERS_GAP),
             0,
-            MODIFIER_WIDTH,
-            MODIFIERS_CANVAS_HEIGHT,
-            &active_modifier_background_dsc
+            1 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_WIDTH - 1,
+            0 + MODIFIERS_CANVAS_HEIGHT - 1
+        };
+        lv_draw_rect(
+            &layer,
+            &active_modifier_background_dsc,
+            &active_modifier_coords_rect
         );
     }
 
-    lv_canvas_draw_text(
-        modifiers_canvas,
+    lv_area_t alt_modifier_coords_rect = {
         1 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X,
         MODIFIER_PADDING_Y,
-        MODIFIER_WIDTH,
+        1 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X + MODIFIER_WIDTH - 1,
+        MODIFIER_PADDING_Y + press_start_2p_8.line_height - 1
+    };
+
+    active_modifier_text_dsc.text = "A";
+    inactive_modifier_text_dsc.text = "A";
+    lv_draw_label(
+        &layer,
         states.modifiers.is_alt_active ? &active_modifier_text_dsc : &inactive_modifier_text_dsc,
-        "A"
+        &alt_modifier_coords_rect
     );
 
     if (states.modifiers.is_ctrl_active) {
-        lv_canvas_draw_rect(
-            modifiers_canvas,
+        lv_area_t active_modifier_coords_rect = {
             2 * (MODIFIER_WIDTH + MODIFIERS_GAP),
             0,
-            MODIFIER_WIDTH,
-            MODIFIERS_CANVAS_HEIGHT,
-            &active_modifier_background_dsc
+            2 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_WIDTH - 1,
+            0 + MODIFIERS_CANVAS_HEIGHT - 1
+        };
+        lv_draw_rect(
+            &layer,
+            &active_modifier_background_dsc,
+            &active_modifier_coords_rect
         );
     }
 
-    lv_canvas_draw_text(
-        modifiers_canvas,
+    lv_area_t ctrl_modifier_coords_rect = {
         2 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X,
         MODIFIER_PADDING_Y,
-        MODIFIER_WIDTH,
+        2 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X + MODIFIER_WIDTH - 1,
+        MODIFIER_PADDING_Y + press_start_2p_8.line_height - 1
+    };
+
+    active_modifier_text_dsc.text = "C";
+    inactive_modifier_text_dsc.text = "C";
+    lv_draw_label(
+        &layer,
         states.modifiers.is_ctrl_active ? &active_modifier_text_dsc : &inactive_modifier_text_dsc,
-        "C"
+        &ctrl_modifier_coords_rect
     );
 
     if (states.modifiers.is_shift_active) {
-        lv_canvas_draw_rect(
-            modifiers_canvas,
+        lv_area_t active_modifier_coords_rect = {
             3 * (MODIFIER_WIDTH + MODIFIERS_GAP),
             0,
-            MODIFIER_WIDTH,
-            MODIFIERS_CANVAS_HEIGHT,
-            &active_modifier_background_dsc
+            3 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_WIDTH - 1,
+            0 + MODIFIERS_CANVAS_HEIGHT - 1
+        };
+        lv_draw_rect(
+            &layer,
+            &active_modifier_background_dsc,
+            &active_modifier_coords_rect
         );
     }
 
-    lv_canvas_draw_text(
-        modifiers_canvas,
+    lv_area_t shift_modifier_coords_rect = {
         3 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X,
         MODIFIER_PADDING_Y,
-        MODIFIER_WIDTH,
+        3 * (MODIFIER_WIDTH + MODIFIERS_GAP) + MODIFIER_PADDING_X + MODIFIER_WIDTH - 1,
+        MODIFIER_PADDING_Y + press_start_2p_8.line_height - 1
+    };
+
+    active_modifier_text_dsc.text = "S";
+    inactive_modifier_text_dsc.text = "S";
+    lv_draw_label(
+        &layer,
         states.modifiers.is_shift_active ? &active_modifier_text_dsc : &inactive_modifier_text_dsc,
-        "S"
+        &shift_modifier_coords_rect
     );
+
+    lv_canvas_finish_layer(modifiers_canvas, &layer);
 }
