@@ -11,8 +11,6 @@
 
 #include <stdlib.h>
 #include <zephyr/kernel.h>
-#include "../../include/images/noise_0.h"
-#include "../../include/images/noise_1.h"
 
 void rotate_battery_canvas() {
     static lv_color_t tmp_buffer[
@@ -83,18 +81,27 @@ void render_connectivity() {
 }
 
 // 1. Insert images here.
+LV_IMG_DECLARE(noise_0);
+LV_IMG_DECLARE(noise_1);
+LV_IMG_DECLARE(noise_2);
+LV_IMG_DECLARE(noise_3);
+LV_IMG_DECLARE(noise_4);
+LV_IMG_DECLARE(noise_5);
 const lv_image_dsc_t* images[] = {
     &noise_0,
-    &noise_1
+    &noise_1,
+    &noise_2,
+    &noise_3,
+    &noise_4,
+    &noise_5
 };
 
-// 2. Update the number of frames in the animation to match the number of images.
-static const unsigned int frame_count = 2;
+static const unsigned int frame_count = sizeof(images) / sizeof(images[0]);
 
 void initialize_animation() {
     lv_animimg_set_src(image_canvas, (const void**)images, frame_count);
-    // 3. Set the time for the whole animation.
-    lv_animimg_set_duration(image_canvas, 250);
+    // 2. Set the time for the whole animation.
+    lv_animimg_set_duration(image_canvas, 600);
 }
 
 void start_animation() {

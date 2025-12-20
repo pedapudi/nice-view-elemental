@@ -29,6 +29,10 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
       ./src/peripheral/initialize_listeners.c
       ./src/images/noise_0.c
       ./src/images/noise_1.c
+      ./src/images/noise_2.c
+      ./src/images/noise_3.c
+      ./src/images/noise_4.c
+      ./src/images/noise_5.c
       ./src/peripheral/render.c
     )
   endif()

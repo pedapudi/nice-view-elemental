@@ -151,10 +151,13 @@ lv_obj_t* zmk_display_status_screen() {
     lv_obj_align(
         image_canvas,
         LV_ALIGN_TOP_LEFT,
-        16,
-        2
+        0,
+        0
     );
+    lv_obj_move_to_index(image_canvas, 0);
 #endif
+    lv_obj_move_to_index(battery_canvas, 1);
+    lv_obj_move_to_index(connectivity_canvas, 1);
 
     // Depending on which half the build is for, the implementation will differ.
     initialize_listeners();
