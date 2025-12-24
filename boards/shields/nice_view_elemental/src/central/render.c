@@ -190,7 +190,7 @@ void render_main() {
     lv_layer_t layer;
     lv_canvas_init_layer(layer_canvas, &layer);
 
-    lv_canvas_fill_bg(layer_canvas, FOREGROUND_COLOR, LV_OPA_TRANSP);
+    lv_canvas_fill_bg(layer_canvas, BACKGROUND_COLOR, LV_OPA_TRANSP);
 
     // Capitalize the layer name if given or use the layer number otherwise.
     char* text = NULL;

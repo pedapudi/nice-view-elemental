@@ -18,6 +18,7 @@
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/keymap.h>
 #include <zmk/usb.h>
+#include "../../include/main.h"
 #include "../../include/central/render.h"
 
 struct states states;
@@ -201,9 +202,38 @@ ZMK_SUBSCRIPTION(
     zmk_keycode_state_changed
 );
 
+// 1. Insert images here.
+LV_IMG_DECLARE(grid);
+LV_IMG_DECLARE(grid_inverse);
+const lv_image_dsc_t* images[] = {
+    &grid,
+    // &grid_inverse
+};
+
+static const unsigned int frame_count = sizeof(images) / sizeof(images[0]);
+
+void initialize_animation() {
+    lv_animimg_set_src(image_canvas, (const void**)images, frame_count);
+    // 2. Set the time for the whole animation.
+    lv_animimg_set_duration(image_canvas, 200);
+}
+
+void start_animation() {
+    lv_animimg_set_repeat_count(image_canvas, LV_ANIM_REPEAT_INFINITE);
+    lv_animimg_start(image_canvas);
+}
+
+void stop_animation() {
+    lv_animimg_set_repeat_count(image_canvas, 1);
+    lv_animimg_start(image_canvas);
+}
+
 void initialize_listeners() {
     widget_layer_state_update_init();
     widget_connectivity_state_update_init();
     widget_battery_state_update_init();
     widget_modifiers_state_update_init();
+
+    initialize_animation();
+    start_animation();
 }

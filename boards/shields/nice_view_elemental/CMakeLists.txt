@@ -14,6 +14,7 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     ./src/utils/draw_usb_logo.c
     
     ./src/images/grid.c
+    ./src/images/grid_inverse.c
     ./src/images/battery.c
     ./src/images/battery_bolt.c
     ./src/images/usb.c

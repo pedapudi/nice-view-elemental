@@ -50,7 +50,5 @@ extern lv_color_t layer_canvas_buffer[];
 extern lv_obj_t* modifiers_canvas;
 extern lv_color_t modifiers_canvas_buffer[];
 
-#if (defined(CONFIG_ZMK_SPLIT) && !defined(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
 extern lv_obj_t* image_canvas;
 extern lv_color_t image_canvas_buffer[];
-#endif
