@@ -1,7 +1,10 @@
 #include "../../include/utils/draw_bluetooth_logo.h"
 
 #include <lvgl.h>
-#include "../../include/images/bluetooth_logo.h"
+#include "../../include/colors.h"
+
+LV_IMG_DECLARE(bluetooth_logo);
+LV_IMG_DECLARE(bluetooth_logo_mask);
 
 void draw_bluetooth_logo(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y) {
     lv_draw_image_dsc_t img_dsc;

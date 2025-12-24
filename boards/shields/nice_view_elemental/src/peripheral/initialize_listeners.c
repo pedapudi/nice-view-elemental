@@ -145,6 +145,6 @@ void initialize_listeners() {
 
     // We are calling this one during the initialization since no state is bound
     // to it.
-    initialize_animation();
-    start_animation();
+    // initialize_animation();
+    // start_animation();
 }
