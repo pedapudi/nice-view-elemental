@@ -47,14 +47,6 @@ lv_color_t modifiers_canvas_buffer[
 ];
 
 lv_obj_t* image_canvas;
-lv_color_t image_canvas_buffer[
-    LV_CANVAS_BUF_SIZE(
-        IMAGE_CANVAS_WIDTH,
-        IMAGE_CANVAS_HEIGHT,
-        LV_COLOR_FORMAT_GET_BPP(COLOR_FORMAT),
-        LV_DRAW_BUF_STRIDE(IMAGE_CANVAS_WIDTH, COLOR_FORMAT)
-    )
-];
 
 LV_IMG_DECLARE(grid);
 

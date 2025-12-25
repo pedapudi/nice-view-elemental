@@ -4,13 +4,13 @@
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
 
-#ifndef LV_ATTRIBUTE_BLUETOOTH_LOGO
-#define LV_ATTRIBUTE_BLUETOOTH_LOGO
+#ifndef LV_ATTRIBUTE_BLUETOOTH_CONNECTED
+#define LV_ATTRIBUTE_BLUETOOTH_CONNECTED
 #endif
 
 static const
-LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_BLUETOOTH_LOGO
-uint8_t bluetooth_logo_map[] = {
+LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_BLUETOOTH_CONNECTED
+uint8_t bluetooth_connected_map[] = {
 
     0xfe,0x00,0xfe,0x00,0xfe,0x00,0xfe,0x00,0xfe,0xff,0xfe,0xff,0xfe,0xff,0xfe,0xff,0xfe,0xff,0xfe,0xff,0xfe,0x00,0xfe,0x00,0xfe,0x00,0xfe,0x00,
     0xfe,0x00,0xfe,0x00,0xfe,0xff,0xfe,0xff,0xfe,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0x00,0xff,0xfe,0xff,0xfe,0xff,0xfe,0xff,0xfe,0x00,0xfe,0x00,
@@ -34,7 +34,7 @@ uint8_t bluetooth_logo_map[] = {
 
 };
 
-const lv_image_dsc_t bluetooth_logo = {
+const lv_image_dsc_t bluetooth_connected = {
   .header = {
     .magic = LV_IMAGE_HEADER_MAGIC,
     .cf = LV_COLOR_FORMAT_AL88,
@@ -44,8 +44,8 @@ const lv_image_dsc_t bluetooth_logo = {
     .stride = 28,
     .reserved_2 = 0,
   },
-  .data_size = sizeof(bluetooth_logo_map),
-  .data = bluetooth_logo_map,
+  .data_size = sizeof(bluetooth_connected_map),
+  .data = bluetooth_connected_map,
   .reserved = NULL,
 };
 

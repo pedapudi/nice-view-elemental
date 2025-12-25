@@ -2,55 +2,17 @@
 
 #include <lvgl.h>
 #include "../../include/colors.h"
+#include "../../include/utils/draw_image.h"
 
 LV_IMG_DECLARE(battery);
-static void draw_battery_outline(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y) {
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = &battery;
-
-    lv_layer_t layer;
-    lv_canvas_init_layer(canvas, &layer);
-
-    lv_area_t coords = { 
-        x,
-        y,
-        x + battery.header.w - 1,
-        y + battery.header.h - 1
-    };
-
-    lv_draw_image(&layer, &img_dsc, &coords);
-
-    lv_canvas_finish_layer(canvas, &layer);
-}
-
 LV_IMG_DECLARE(battery_bolt);
-static void draw_battery_lightning_bolt(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y) {
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = &battery_bolt;
-
-    lv_layer_t layer;
-    lv_canvas_init_layer(canvas, &layer);
-
-    lv_area_t coords = { 
-        x + 10,
-        y + 3,
-        x + 10 + battery_bolt.header.w - 1,
-        y + 3 + battery_bolt.header.h - 1
-    };
-
-    lv_draw_image(&layer, &img_dsc, &coords);
-
-    lv_canvas_finish_layer(canvas, &layer);
-}
 
 void draw_battery(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y, struct battery_state state) {
-    draw_battery_outline(canvas, x, y);
+    draw_image(&battery, canvas, x, y);
 
     // Draw the main part of the battery
     // const int width = 19 * (state.level / 100.0);
-    // ! TODO Fix freezing issue when battery nearing 100%.
+    // ! TODO Fix freezing issue when battery nearing 100%. 19 should be the max width, but from 17 on, the keyboard freezes.
     const int width = 16 * (state.level / 100.0);
     if (width > 0) {
         lv_layer_t layer;
@@ -77,6 +39,6 @@ void draw_battery(lv_obj_t* canvas, lv_coord_t x, lv_coord_t y, struct battery_s
     }
 
     if (state.is_charging) {
-        draw_battery_lightning_bolt(canvas, x, y);
+        draw_image(&battery_bolt, canvas, x + 10, y + 3);
     }
 }

@@ -1,4 +1,4 @@
-#include "../../include/central/render.h"
+#include "../include/render.h"
 
 #include <ctype.h>
 #include <lvgl.h>
@@ -6,17 +6,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zephyr/sys/util.h>
-#include "../../include/colors.h"
-#include "../../include/central/initialize_listeners.h"
-#include "../../include/fonts/press_start_2p_8.h"
-#include "../../include/fonts/press_start_2p_16.h"
-#include "../../include/fonts/press_start_2p_24.h"
-#include "../../include/main.h"
-#include "../../include/utils/draw_battery.h"
-#include "../../include/utils/draw_bluetooth_searching.h"
-#include "../../include/utils/draw_bluetooth_logo_outlined.h"
-#include "../../include/utils/draw_bluetooth_logo.h"
-#include "../../include/utils/draw_usb_logo.h"
+#include "../include/colors.h"
+#include "../include/initialize_listeners.h"
+#include "../include/fonts/press_start_2p_8.h"
+#include "../include/fonts/press_start_2p_16.h"
+#include "../include/fonts/press_start_2p_24.h"
+#include "../include/main.h"
+#include "../include/utils/draw_battery.h"
+#include "../include/utils/draw_image.h"
+
+LV_IMG_DECLARE(bluetooth_connected);
+LV_IMG_DECLARE(bluetooth_disconnected);
+LV_IMG_DECLARE(bluetooth_searching);
+LV_IMG_DECLARE(usb);
+
 void draw_label_with_outline(
     lv_obj_t* canvas,
     lv_layer_t* layer,
@@ -92,21 +95,78 @@ void draw_label_with_outline(
     lv_canvas_finish_layer(canvas, layer);
 }
 
+void rotate_battery_canvas() {
+    static lv_color_t tmp_buffer[
+        LV_CANVAS_BUF_SIZE(
+            BATTERY_CANVAS_WIDTH,
+            BATTERY_CANVAS_HEIGHT,
+            LV_COLOR_FORMAT_GET_BPP(LV_COLOR_FORMAT_ARGB8888),
+            LV_DRAW_BUF_STRIDE_ALIGN
+        )
+    ];
+    memcpy(tmp_buffer, battery_canvas_buffer, sizeof(tmp_buffer));
+
+    const uint32_t stride = lv_draw_buf_width_to_stride(BATTERY_CANVAS_WIDTH, LV_COLOR_FORMAT_ARGB8888);
+    lv_draw_sw_rotate(
+        tmp_buffer,
+        battery_canvas_buffer,
+        BATTERY_CANVAS_WIDTH,
+        BATTERY_CANVAS_HEIGHT,
+        stride,
+        stride,
+        LV_DISPLAY_ROTATION_180,
+        LV_COLOR_FORMAT_ARGB8888
+    );
+}
+
 void render_battery() {
     lv_canvas_fill_bg(battery_canvas, BACKGROUND_COLOR, LV_OPA_TRANSP);
 
     draw_battery(battery_canvas, 0, 0, states.battery);
+
+#if (defined(CONFIG_ZMK_SPLIT) && !defined(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
+    rotate_battery_canvas();
+#endif
 }
 
+void rotate_connectivity_canvas() {
+    static lv_color_t tmp_buffer[
+        LV_CANVAS_BUF_SIZE(
+            CONNECTIVITY_CANVAS_WIDTH,
+            CONNECTIVITY_CANVAS_HEIGHT,
+            LV_COLOR_FORMAT_GET_BPP(COLOR_FORMAT),
+            LV_DRAW_BUF_STRIDE_ALIGN
+        )
+    ];
+    memcpy(tmp_buffer, connectivity_canvas_buffer, sizeof(tmp_buffer));
+
+    lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_0);
+
+    const uint32_t stride = lv_draw_buf_width_to_stride(CONNECTIVITY_CANVAS_WIDTH, COLOR_FORMAT);
+    lv_draw_sw_rotate(
+        tmp_buffer,
+        connectivity_canvas_buffer,
+        CONNECTIVITY_CANVAS_WIDTH,
+        CONNECTIVITY_CANVAS_HEIGHT,
+        stride,
+        stride,
+        LV_DISPLAY_ROTATION_180,
+        COLOR_FORMAT
+    );
+}
+
+
+
+#if (defined(CONFIG_ZMK_SPLIT) && defined(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
 static void render_bluetooth_logo() {
     if (states.connectivity.active_profile_bonded) {
         if (states.connectivity.active_profile_connected) {
-            draw_bluetooth_logo(connectivity_canvas, 16, 0);
+            draw_image(&bluetooth_connected, connectivity_canvas, 16, 0);
         } else {
-            draw_bluetooth_logo_outlined(connectivity_canvas, 16, 0);
+            draw_image(&bluetooth_disconnected, connectivity_canvas, 16, 0);
         }
     } else {
-        draw_bluetooth_searching(connectivity_canvas, 16, 0);
+        draw_image(&bluetooth_searching, connectivity_canvas, 16, 0);
     }
 }
 
@@ -150,42 +210,34 @@ static void render_bluetooth_connectivity() {
     render_bluetooth_profile_index();
 }
 
-LV_IMG_DECLARE(usb);
-static void render_usb_connectivity() {
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = &usb;
-
-    lv_layer_t layer;
-    lv_canvas_init_layer(connectivity_canvas, &layer);
-
-    lv_area_t coords = { 
-        7,
-        4,
-        7 + usb.header.w - 1,
-        4 + usb.header.h - 1
-    };
-
-    lv_draw_image(&layer, &img_dsc, &coords);
-
-    lv_canvas_finish_layer(connectivity_canvas, &layer);
-}
+#endif
 
 void render_connectivity() {
     lv_canvas_fill_bg(connectivity_canvas, BACKGROUND_COLOR, LV_OPA_TRANSP);
 
+#if (defined(CONFIG_ZMK_SPLIT) && defined(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
     switch (states.connectivity.selected_endpoint.transport) {
         case ZMK_TRANSPORT_BLE: {
             render_bluetooth_connectivity();
             break;
         }
         case ZMK_TRANSPORT_USB: {
-            render_usb_connectivity();
+            draw_image(&usb, connectivity_canvas, 7, 4);
             break;
         }
     }
+#else
+    if (states.connectivity.connected) {
+        draw_image(&bluetooth_connected, connectivity_canvas, 16, 0);
+    } else {
+        draw_image(&bluetooth_disconnected, connectivity_canvas, 16, 0);
+    }
+
+    rotate_connectivity_canvas();
+#endif
 }
 
+#if (defined(CONFIG_ZMK_SPLIT) && defined(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
 void render_main() {
     lv_layer_t layer;
     lv_canvas_init_layer(layer_canvas, &layer);
@@ -406,4 +458,31 @@ void render_modifiers() {
             lv_canvas_finish_layer(modifiers_canvas, &layer);
         }
     }
+}
+#endif
+
+// 1. Insert images here.
+LV_IMG_DECLARE(grid);
+LV_IMG_DECLARE(grid_inverse);
+const lv_image_dsc_t* images[] = {
+    &grid,
+    // &grid_inverse
+};
+
+static const unsigned int frame_count = sizeof(images) / sizeof(images[0]);
+
+void initialize_animation() {
+    lv_animimg_set_src(image_canvas, (const void**)images, frame_count);
+    // 2. Set the time for the whole animation.
+    lv_animimg_set_duration(image_canvas, 200);
+}
+
+void start_animation() {
+    lv_animimg_set_repeat_count(image_canvas, LV_ANIM_REPEAT_INFINITE);
+    lv_animimg_start(image_canvas);
+}
+
+void stop_animation() {
+    lv_animimg_set_repeat_count(image_canvas, 1);
+    lv_animimg_start(image_canvas);
 }
